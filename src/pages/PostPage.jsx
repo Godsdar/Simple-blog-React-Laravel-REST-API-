@@ -8,17 +8,13 @@ export default function PostPage() {
 
   useEffect(() => {
     async function fetchPost() {
-      const response = await fetch(
-        'https://jsonplaceholder.typicode.com/posts/3',
-      );
+      const response = await fetch('/api/posts/3');
       const data = await response.json();
       setPost(data);
     }
 
     async function fetchComments() {
-      const response = await fetch(
-        'https://jsonplaceholder.typicode.com/comments?postId=3',
-      );
+      const response = await fetch('/api/posts/5/comments');
       const data = await response.json();
       setComments(data);
     }
