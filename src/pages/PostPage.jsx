@@ -8,23 +8,24 @@ export default function PostPage() {
 
   useEffect(() => {
     async function fetchPost() {
-      const response = await fetch('/api/posts/3');
+      const response = await fetch('/api/posts/1');
       const data = await response.json();
       setPost(data);
     }
 
     async function fetchComments() {
-      const response = await fetch('/api/posts/5/comments');
+      const response = await fetch('/api/posts/1/comments');
       const data = await response.json();
       setComments(data);
     }
     fetchPost();
     fetchComments();
   }, []);
+
   return (
     <div className="flex p-5 mx-auto w-3/5 bg-red-100">
       <div className="flex flex-col justify-start mx-auto m-10">
-        {post && <Post title={post.title} text={post.body}></Post>}
+        <Post title={post?.title} text={post?.text}></Post>
         <CommentsSection comments={comments}></CommentsSection>
       </div>
     </div>

@@ -2,17 +2,27 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Comment;
+use Illuminate\Http\Request;
 
-class CommentsController extends Controller
+class CommentController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index($postId)
     {
-        $comments = Comment::all();
+        $comments = Comment::where('post_id', $postId)
+            ->with('user')
+            ->get()
+            ->map(fn ($comment) => [
+                'id' => $comment->id,
+                'text' => $comment->content,
+                'user' => $comment->user->name ?? 'Sorax',
+                'avatar' => $comment->user->avatar ?? 'https://i.pravatar.cc/100',
+                'time' => $comment->created_at->diffForHumans(),
+            ]);
+
         return response()->json($comments);
     }
 
@@ -35,7 +45,7 @@ class CommentsController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Comment $comment)
     {
         //
     }
@@ -43,7 +53,7 @@ class CommentsController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Comment $comment)
     {
         //
     }
@@ -51,7 +61,7 @@ class CommentsController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Comment $comment)
     {
         //
     }
@@ -59,7 +69,7 @@ class CommentsController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Comment $comment)
     {
         //
     }
