@@ -1,16 +1,59 @@
-# React + Vite
+# Simple Blog — React + Laravel REST API
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Небольшой блог: SPA на React (Vite) и REST API на Laravel. Фронтенд обращается к бэкенду через прокси Vite: `/api` → `http://localhost:8000`, префикс `/api` отбрасывается.
 
-Currently, two official plugins are available:
+## Стек
+- Frontend: React 19, Vite 8, React Router 7, Axios, Tailwind CSS 4, react-icons.
+- Backend: PHP 8.3, Laravel 13, Laravel Sanctum, MySQL/SQLite (через `.env`), PHPUnit.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Структура
+- `src/` — React-приложение (`components/`, `pages/`, `assets/`).
+- `api/` — Laravel: `routes/`, `app/Http/Controllers/`, `app/Models/`, `database/migrations/`.
+- `Dockerfile`, `compose.yaml` — контейнеризация фронтенда.
 
-## React Compiler
+## Эндпойнты (по коду)
+Объявлены в `api/routes/web.php`:
+| Метод | Путь | Контроллер |
+|---|---|---|
+| GET | /posts | PostController@index |
+| POST | /posts | PostController@store |
+| GET | /posts/{id} | PostController@show |
+| GET | /posts/{id}/comments | CommentController@index |
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+В `api/routes/api.php` объявлен только `GET /user` (middleware `auth:sanctum`).
 
-## Expanding the ESLint configuration
+## Запуск (локально, dev)
+Backend:
+```sh
+cd api
+composer install
+cp .env.example .env
+php artisan key:generate
+php artisan migrate
+php artisan serve        # http://localhost:8000
+```
+Frontend:
+```sh
+yarn install
+yarn dev                 # Vite dev-сервер, проксирует /api → http://localhost:8000
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Запуск через Docker
+```sh
+docker compose up --build
+```
+`Dockerfile` устанавливает зависимости и запускает `yarn dev`. В `compose.yaml` порт опубликован как `9000:80`, при этом контейнер слушает порт `5180` (значения не согласованы, см. Заметки).
+
+## Тесты
+```sh
+cd api
+php artisan test
+```
+`phpunit.xml` использует SQLite в памяти. В репозитории только стандартные `ExampleTest` (Unit, Feature).
+
+## Заметки (по факту кода)
+- API-роуты постов лежат в `routes/web.php`, а не в `routes/api.php`.
+- В `database/migrations/` две миграции создают таблицу `posts` (`2026_05_25_105757_...` и `2026_06_15_100418_...`).
+- `PostController` объявляет только `index` и `show`, хотя роут `POST /posts` ссылается на `store`.
+- Порты `Dockerfile` (`5180`) и `compose.yaml` (`9000:80`) не согласованы.
+- `.env` не должен попадать в репозиторий (в `.gitignore`); реальные ключи в коде не хранятся.
